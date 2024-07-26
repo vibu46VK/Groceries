@@ -1,0 +1,49 @@
+import java.io.IOException;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        TaskManager taskManager = new TaskManager("tasks.txt");
+
+        try {
+            taskManager.loadTasks();
+        } catch (IOException e) {
+            System.out.println("Error loading tasks: " + e.getMessage());
+        }
+
+        Scanner scanner = new Scanner(System.in);
+        String command;
+
+        while (true) {
+            System.out.println("\nCommands: add [task], list, done [taskID], delete [taskID], exit");
+            System.out.print("Enter command: ");
+            command = scanner.nextLine();
+
+            if (command.equals("exit")) {
+                break;
+            } else if (command.startsWith("add ")) {
+                String taskDescription = command.substring(4);
+                taskManager.addTask(new Task(taskDescription));
+            } else if (command.equals("list")) {
+                taskManager.listTasks();
+            } else if (command.startsWith("done ")) {
+                int taskId = Integer.parseInt(command.substring(5));
+                taskManager.markTaskAsDone(taskId);
+            } else if (command.startsWith("delete ")) {
+                int taskId = Integer.parseInt(command.substring(7));
+                taskManager.deleteTask(taskId);
+            } else {
+                System.out.println("Unknown command");
+            }
+
+            try {
+                taskManager.saveTasks();
+            } catch (IOException e) {
+                System.out.println("Error saving tasks: " + e.getMessage());
+            }
+        }
+
+        scanner.close();
+    }
+}
+
