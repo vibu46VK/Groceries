@@ -1,0 +1,67 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TaskManager {
+    private final List<Task> tasks = new ArrayList<>();
+    private final String fileName;
+
+    public TaskManager(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void addTask(Task task) {
+        tasks.add(task);
+    }
+
+    public void listTasks() {
+        for (Task task : tasks) {
+            System.out.println(task);
+        }
+    }
+
+    public void markTaskAsDone(int id) {
+        for (Task task : tasks) {
+            if (task.getId() == id) {
+                task.markAsDone();
+                return;
+            }
+        }
+        System.out.println("Task not found");
+    }
+
+    public void deleteTask(int id) {
+        tasks.removeIf(task -> task.getId() == id);
+    }
+
+    public void loadTasks() throws IOException {
+        File file = new File(fileName);
+        if (!file.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":", 2);
+                if (parts.length == 2) {
+                    int id = Integer.parseInt(parts[0].trim());
+                    String description = parts[1].trim();
+                    Task task = new Task(description);
+                    if (id < Task.idCounter) {
+                        task.markAsDone();
+                    }
+                    tasks.add(task);
+                }
+            }
+        }
+    }
+
+    public void saveTasks() throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (Task task : tasks) {
+                writer.write(task.getId() + ": " + task.getDescription() + (task.isDone() ? " (done)" : ""));
+                writer.newLine();
+            }
+        }
+    }
+}
+
